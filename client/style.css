@@ -1,0 +1,44 @@
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #deeaee;
+}
+
+h3 {
+  font-size: 2em;
+}
+
+#top {
+  text-align: center;
+  margin: 0 auto;
+}
+
+#top h1 {
+  font-size: 2em;
+}
+
+#nameForm {
+  margin: 50px;
+  background-color: #b1cbbb;
+  padding: 1em 0em;
+}
+
+#userForm { 
+  margin: 50px;
+  background-color: #eea29a;
+  padding: 1em 0em;
+}
+
+#content {
+  margin: 50px;
+  font-size: 1em;
+  font-family: sans-serif;
+  text-align: center;
+  background-color: #c94c4c;
+}
+
+#urlField {
+  display: none;
+}

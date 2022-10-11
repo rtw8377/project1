@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Our simple HTTP server</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  
+  <script>
+      const getRand = (min, max) => {
+          return Math.floor(Math.random() * (max - min + 1) ) + min;
+      };
+
+      const handleResponse = async (response, form) => {
+      const content = document.querySelector('#content');
+      switch(response.status) {
+        case 200:
+          content.innerHTML = '<b>Success</b>';
+          break;
+        case 201: 
+          content.innerHTML = `<b>Created</b>`;
+          break;
+        case 204:
+          content.innerHTML = `<b>Updated</b>`;
+          break;
+        case 400:
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 404:
+          content.innerHTML = `<b>Resource Not Found</b>`;
+          break;
+        default: 
+          content.innerHTML = `Error code not implemented by client.`;
+          break;
+      }
+
+      const search = document.querySelector('#search').value;
+      const method = document.querySelector('#methodSelect');
+
+      if(method.value == 'get'){
+
+        const urlField = document.querySelector('#urlField');
+
+        if(form.method == 'post'){
+
+          response.text().then((responseText) => {
+            if(responseText == ''){
+              return false;
+            }
+            console.log(responseText);
+            let parsedResponse = JSON.parse(responseText);
+            console.log(parsedResponse);
+            content.innerHTML += `<p>${parsedResponse.message}</p>`;
+
+          });
+        }
+        else if(form.method == 'get'){
+        response.text().then((responseText) => {
+            let parsedResponse = JSON.parse(responseText);
+            console.log(parsedResponse);
+
+            let num = getRand(0, parsedResponse.json.length-1);
+            console.log(num);
+
+            let element = parsedResponse.json;
+            console.log(element[num].Name);
+
+            for (var i = 0; i < parsedResponse.json.length; i++){
+              if (element[i].Name == search){
+                console.log(element[i].Name);
+                console.log(search);
+                const name = `
+                <p> ${element[i].Name} </p><br>
+                <p> By ${element[i].Author} </p><br>
+                <p> ${element[i].url} </p><br>
+                <p> ${element[i].Description} </p><br>
+                <p> ${element[i].Ingredients} </p><br>
+                <p> ${element[i].Method} </p><br>
+                `
+                if(urlField.value == "/getUsers"){
+                  content.innerHTML += name;
+                  return;
+                }
+              }
+            }
+
+            const name = `
+            <p> ${element[num].Name} </p><br>
+            <p> By ${element[num].Author} </p><br>
+            <p> ${element[num].url} </p><br>
+            <p> ${element[num].Description} </p><br>
+            <p> ${element[num].Ingredients} </p><br>
+            <p> ${element[num].Method} </p><br>
+            `
+            
+            if(urlField.value == "/getUsers"){
+              content.innerHTML += name;
+            }
+            else if(urlField.value == "/notReal"){
+              content.innerHTML += `<p>${parsedResponse.message}</p>`;
+            }
+        });
+        }
+      }
+    };
+
+    const sendPost = async (nameForm)=> {
+      const nameAction = nameForm.getAttribute('action');
+      const nameMethod = nameForm.getAttribute('method');
+
+      const nameField = nameForm.querySelector('#nameField');
+      const linkField = nameForm.querySelector('#linkField');
+      const desField = nameForm.querySelector('#desField');
+      const authorField = nameForm.querySelector('#authorField');
+      const ingField = nameForm.querySelector('#ingField');
+      const methodField = nameForm.querySelector('#methodField');
+
+
+      const formData = `name=${nameField.value}&link=${linkField.value}&description=${desField.value}&author=${authorField.value}&ingredients=${ingField.value}&method=${methodField.value}`;
+
+      let response = await fetch(nameAction, {
+        method: nameMethod,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept' : 'application/json',
+        },
+        body: formData,
+      });
+
+      handleResponse(response, nameForm);
+    };
+
+    const getPost = async (userForm) => {
+      const nameMethod = userForm.getAttribute('method');
+
+      let response = await fetch(urlField.value, {
+        method: nameMethod,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
+        },
+      });
+
+      handleResponse(response, userForm);
+    };
+
+    const init = () => {
+      const nameForm = document.querySelector('#nameForm');
+      const userForm = document.querySelector('#userForm');
+
+      const addUser = (e) => {
+        e.preventDefault();
+        sendPost(nameForm);
+        return false;
+      }
+
+      const getUsers = (e) => {
+        e.preventDefault();
+        getPost(userForm);
+        return false;
+      }
+
+      nameForm.addEventListener('submit', addUser);
+      userForm.addEventListener('submit', getUsers);
+    };
+
+    window.onload = init;
+  </script>
+</head>
+<body>
+  <section id="top">
+    <h3>Christmas Recipe finder</h3>
+    <form id="nameForm" action="/addUser" method="post">
+      <label for="name">Name: </label>
+      <input id="nameField" type="text" name="name" />
+      <label for="link">url: </label>
+      <input id="linkField" type="text" name="link" value="null" />
+      <label for="description">Description: </label>
+      <input id="desField" type="text" name="description" />
+      <label for="author">Author: </label>
+      <input id="authorField" type="text" name="author" />
+      <label for="ingredients">Ingredients: </label>
+      <input id="ingField" type="text" name="ingredients" />
+      <label for="method">Method: </label>
+      <input id="methodField" type="text" name="method" />
+      <input type="submit" value="Add Recipe" />
+    </form>
+    <form id="userForm" action="/getUsers" method="get">
+      <label for="search">Search: </label>
+      <input type="text" id="search" name="search">
+      <select id='urlField'>
+        <option value='/getUsers'>/getUsers</option>
+        <option value='/notReal'>/notReal</option>
+      </select>
+      <select id="methodSelect">
+        <option value="get">GET</option>
+        <option value="head">HEAD</option>
+      </select>
+      <input type="submit" value="Search / Get Random Recipe" />
+    </form>
+  </section>
+  <section id="content">
+  </section>
+</body>
+</html>
