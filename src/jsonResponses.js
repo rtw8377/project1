@@ -1,8 +1,7 @@
-const { strictEqual } = require('assert');
 const fs = require('fs');
 
 const users = fs.readFileSync(`${__dirname}/../recipes.json`);
-var json = JSON.parse(users);
+const json = JSON.parse(users);
 
 const respondJSON = (request, response, status, object) => {
   response.writeHead(status, { 'Content-Type': 'application/json' });
@@ -32,7 +31,8 @@ const addUser = (request, response, body) => {
 
   // checks to see if both the body and age are filled in
   // returns with 400 error code if both are empty
-  if (!body.name || !body.link || !body.description || !body.author || !body.ingredients || !body.method) {
+  if (!body.name || !body.link || !body.description || !body.author
+    || !body.ingredients || !body.method) {
     responseJSON.id = 'missingParams';
     return respondJSON(request, response, 400, responseJSON);
   }
@@ -54,17 +54,19 @@ const addUser = (request, response, body) => {
   users[body.name].ingredients = body.ingredients;
   users[body.name].method = body.method;
 
-  let newData = {
+  const newData = {
     Name: users[body.name].name,
     url: users[body.name].link,
-    Description: users[body.name].description, 
+    Description: users[body.name].description,
     Author: users[body.name].author,
     Ingredients: users[body.name].ingredients,
-    Method: users[body.name].method
-  }
+    Method: users[body.name].method,
+  };
 
   json.push(newData);
-  //'{Name: ' + users[body.name].name + ", url: " + users[body.name].link + ', Description:' + users[body.name].description + ', Author: ' + users[body.name].author + ', Ingredients:' + users[body.name].ingredients + ', Method:' + users[body.name].method + '}';
+  // '{Name: ' + users[body.name].name + ", url: " + users[body.name].link + ', Description:'
+  // + users[body.name].description + ', Author: ' + users[body.name].author + ', Ingredients:' +
+  // users[body.name].ingredients + ', Method:' + users[body.name].method + '}';
 
   fs.writeFileSync(`${__dirname}/../recipes.json`, JSON.stringify(json));
 
